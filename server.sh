@@ -1,8 +1,8 @@
 #!/bin/bash
 
-ttyinfo=$(stty -a | head -n 1)
-rows=$(<<<$ttyinfo cut -d ';' -f 2 | perl -nle 'm/(\d+)/; print $1')
-cols=$(<<<$ttyinfo cut -d ';' -f 3 | perl -nle 'm/(\d+)/; print $1')
+size=( $(stty -a|grep -Po '(rows|columns) \K[^;]+') )
+rows=${size[0]:-30}
+cols=${size[1]:-50}
 
 
 
@@ -30,23 +30,23 @@ function ioctrlTTY() {
 		echo 'Bye !' >/proc/$$/fd/2
 		exit 0
 	    #ctrl r
-	    elif [ $(echo "$key") = $(echo -e "\x12") ] ; then
+	    elif [[ $(echo "$key") == $(echo -e "\x12") ]] ; then
 		echo "python -c 'import pty; pty.spawn(\"/bin/bash\")'"
 		echo "stty rows $rows columns $cols"
 	    # ctrl s
-	    elif [ $(echo "$key") = $(echo -e "\x13") ] ; then
+	    elif [[ $(echo "$key") == $(echo -e "\x13") ]] ; then
 		reset
 		bash -i
 		stty raw -echo
 	    # ctrl t
-	    elif [ $(echo "$key") = $(echo -e "\x14") ] ; then
+	    elif [[ $(echo "$key") == $(echo -e "\x14") ]] ; then
 		reset
 		echo "TTY has been reset" >/proc/$$/fd/2
 	    fi
 	    cmd=0
 	fi
 	
-	if [ $(echo "$key") = $(echo -e "\x10") ] ; then
+	if [[ $(echo "$key") == $(echo -e "\x10") ]] ; then
 	    cmd="1"
 	    continue
 	fi
